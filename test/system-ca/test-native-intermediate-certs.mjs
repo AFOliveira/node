@@ -71,7 +71,9 @@ describe('use-system-ca', function() {
       try {
         await fetch(`https://localhost:${server.address().port}/hello-world`);
       } catch (err) {
-        if (common.isWindows) {
+        // Linux's file-based store includes the configured intermediate,
+        // so OpenSSL reports its missing issuer when the root is untrusted.
+        if (common.isWindows || process.platform === 'linux') {
           assert.strictEqual(err.cause.code, 'UNABLE_TO_GET_ISSUER_CERT');
         } else {
           assert.strictEqual(err.cause.code, untrustedLeafErrorCode);
